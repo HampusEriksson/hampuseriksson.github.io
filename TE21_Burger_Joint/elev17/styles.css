@@ -1,0 +1,49 @@
+    * {
+        margin: 0;
+        padding: 0
+    }
+
+    nav {
+        background-color: rgb(209, 24, 24);
+        text-align: center;
+        padding: 5px;
+    }
+
+
+    ul li {
+        display: inline-block;
+        font-size: 30px;
+        margin-right: 20px;
+    }
+
+    main {
+        border-radius: 10px;
+        background-color: rgb(225, 220, 213);
+    }
+
+    a:link,
+    a:visited {
+        text-decoration: none;
+        color: white;
+    }
+
+    a:hover {
+        color: rgb(212, 212, 63);
+
+    }
+
+    body {
+        height: 100vh;
+        background-image: url(tbj.jpg);
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    footer {
+        background-color: rgb(225, 220, 213);
+        text-align: center;
+        margin-top: auto;
+    }

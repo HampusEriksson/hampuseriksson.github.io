@@ -1,0 +1,70 @@
+h1 {
+  color: #66a3c9;
+  /* Change the text color to deep pink */
+  background-color: #ffffff;
+  /* Bakgrundsfärg: Light Pink */
+  font-size: 36px;
+  /* Change the font size to 36 pixels */
+  font-family: 'Times New Roman', Times, serif;
+  /* Change the font family */
+  text-align: center;
+  /* Center-align the text */
+  text-decoration: none;
+  /* Add an underline to the text */
+}
+
+h2 {
+  color: #66a3c9;
+  /* Change the text color to deep pink */
+  background-color: #ffffff;
+  /* Bakgrundsfärg: Light Pink */
+  font-size: 25px;
+  /* Change the font size to 36 pixels */
+  font-family: 'Times New Roman', Times, serif;
+  /* Change the font family */
+  text-align: left;
+  /* Left-align the text */
+  text-decoration: none;
+  /* Add an underline to the text */
+}
+
+th {
+  color: #66a3c9;
+  /* Change the text color to deep pink */
+  background-color: #ffffff;
+  /* Bakgrundsfärg: Light Pink */
+  font-size: 25px;
+  /* Change the font size to 36 pixels */
+  font-family: 'Times New Roman', Times, serif;
+  /* Change the font family */
+  text-align: left;
+  /* Left-align the text */
+  text-decoration: none;
+  /* Add an underline to the text */
+}
+
+
+head {
+  background-color: #FEE0E4;
+  /* Bakgrundsfärg */
+  color: #333;
+  /* Textfärg */
+  padding: 20px;
+  /* Inre utfyllnad (padding) */
+  margin: 10px;
+  /* Yttre marginal (margin) */
+}
+
+nav {
+  color: #66a3c9;
+  /* Change the text color to deep pink */
+  background-color: #FEE0E4;
+  /* Bakgrundsfärg: Light Pink */
+  text-align: center;
+}
+
+nav ul li {
+  display: inline-block;
+  font-size: 24px;
+  margin-right: 50 px
+}

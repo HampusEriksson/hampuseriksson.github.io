@@ -1,0 +1,80 @@
+* {
+  font-style: Times new roman;
+}
+
+header nav ul {
+  list-style: circle;
+
+  text-align: center;
+}
+
+header nav li {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+header nav a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  padding: 8px 16px;
+  border: 1px solid #333;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+header nav a:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+body {
+  background-image: url("äckliga\ burger.jpg");
+  background-color: #cccccc;
+}
+
+main {
+  text-align: left;
+  margin-top: 50px;
+}
+
+h1 {
+  font-family: sans-serif;
+  color: #3498db;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(200, 0, 0, 0.5);
+  text-decoration: underline;
+}
+
+p {
+  font-family: fantasy;
+  color: #000000;
+  line-height: 1.5;
+}
+
+@keyframes colorChange {
+  0% {
+    color: red;
+  }
+
+  25% {
+    color: blue;
+  }
+
+  50% {
+    color: green;
+  }
+
+  75% {
+    color: orange;
+  }
+
+  100% {
+    color: red;
+  }
+}
+
+#colorChangingNumber {
+  animation: colorChange 2s infinite;
+}

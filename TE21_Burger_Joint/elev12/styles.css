@@ -1,0 +1,56 @@
+*{
+    padding : 0;
+    margin: 0;
+    text-decoration: none;
+}
+
+header {
+    margin : 3%;
+    padding : 2%;
+    background-color: red;
+}
+
+nav {
+    text-align:center;
+    display: flex;
+    flex-direction: row;
+    list-style:none;
+}
+li a {
+    color: green;
+    font-size : 20px;
+    font-weight : 800;
+    text-shadow: 
+    -1px -1px 0 white,  
+     1px -1px 0 white,
+    -1px  1px 0 white,
+     1px  1px 0 white;
+}
+
+li a:hover {
+    color : yellow;
+}
+
+section {
+    margin : 5%;
+    padding : 2%;
+}
+
+.logo {
+    height : 30vh
+}
+
+footer {
+    margin : 3%;
+    padding : 2%;
+    border : 3px solid;
+    color : red;
+}
+
+footer p {
+    color : green;
+}
+
+.foods {
+    height : 20vh;
+}

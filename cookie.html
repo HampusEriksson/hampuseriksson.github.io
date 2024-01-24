@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hampus hemsida</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="cookie.css" />
+  </head>
+  <body>
+    <header></header>
+
+    <main>
+      <section class="highscore">
+        <h2>High scores</h2>
+        <ol id="highScores"></ol>
+      </section>
+      <section class="game">
+        <input type="text" id="username" />
+        <button id="submitUsername" onclick="submitUsername()">
+          Submit username
+        </button>
+        <p id="usernameText"></p>
+
+        <br /><br /><br /><br />
+        <div id="game">
+          <button id="resetButton" onclick="reset()">Reset</button>
+          <p id="amountOfTrees"></p>
+          <p id="treesPerSecond"></p>
+          <img src="tree.jpg" class="treebutton" onclick="addTrees(1)" />
+        </div>
+      </section>
+
+      <section class="store">
+        <img src="watercan.jpg" id="buyWatercan" onclick="buyWatercan()" />
+        <img src="waterhose.jpg" id="buyWaterhose" onclick="buyWaterhose()" />
+        <img src="farm.jpg" id="buyFarm()" onclick="buyFarm()" />
+        <img src="forest.jpg" id="buyForest" onclick="buyForest()" />
+        <img src="planet.jpg" id="buyPlanet" onclick="buyPlanet()" />
+      </section>
+    </main>
+
+    <footer></footer>
+  </body>
+
+  <script src="init.js"></script>
+  <script src="tree.js"></script>
+</html>

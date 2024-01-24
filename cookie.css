@@ -1,0 +1,35 @@
+main {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 20% 60% 20%;
+  }
+  
+  .highscore {
+    background-color: #f0f0f0;
+    border: 5px solid #000000;
+  }
+  
+  .game {
+    background-color: #f0f0f0;
+    border: 5px solid #000000;
+  }
+
+  .store{
+    background-color: #f0f0f0;
+    border: 5px solid #000000;
+  }
+
+  img {
+    width: 20%;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+img:active,
+  img:focus {
+    transform: scale(0.9);
+  }
+
+  .store img{
+    width: 50%;
+  }

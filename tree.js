@@ -12,7 +12,7 @@ const intervalId2 = setInterval(getHighScore, 30000);
 
 // Function to fetch data from the provided URL
 async function getHighScore() {
-    const url = 'http://dreamlo.com/lb/65b0dd218f40bbbdf0eb8543/json';
+    const url = 'https://dreamlo.com/lb/65b0dd218f40bbbdf0eb8543/json';
 
     try {
         // Fetch data from the URL
@@ -42,7 +42,7 @@ async function getHighScore() {
 
  async function checkNewUsername(username) {
     usernameTaken=false;
-    const url = 'http://dreamlo.com/lb/65b0dd218f40bbbdf0eb8543/json';
+    const url = 'https://dreamlo.com/lb/65b0dd218f40bbbdf0eb8543/json';
 
     try {
         // Fetch data from the URL
@@ -197,7 +197,7 @@ async function saveHighScore() {
         return;
     }
 
-    const url = `http://dreamlo.com/lb/NUJ12f4V5kS4tfNyNOLJyQFleqhwJqWUauzuSPLm1-iw/add/${username}/${trees}`;
+    const url = `https://dreamlo.com/lb/NUJ12f4V5kS4tfNyNOLJyQFleqhwJqWUauzuSPLm1-iw/add/${username}/${trees}`;
 
     try {
         const response = await fetch(url, {

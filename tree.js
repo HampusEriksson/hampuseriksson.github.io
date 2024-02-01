@@ -1,6 +1,13 @@
 trees = 0;
 trees_per_second = 0;
 username = '';
+watercan_price = 10;
+waterhose_price = 100;
+farm_price = 1000;
+forest_price = 10000;
+planet_price = 100000;
+
+
 
 hideGame();
 load();
@@ -152,41 +159,46 @@ function reset() {
 
 
 function buyWatercan() {
-    if (trees >= 10) {
-        trees -= 10;
+    if (trees >= watercan_price) {
+        trees -= watercan_price;
         trees_per_second += 1;
+        watercan_price*=1.5;
         showTrees();
     }
     }
 
 function buyWaterhose() {
-    if (trees >= 100) {
-        trees -= 100;
+    if (trees >= waterhose_price) {
+        trees -= waterhose_price;
         trees_per_second += 10;
+        waterhose_price*=1.5;
         showTrees();
     }
     }
 
 function buyFarm() {
-    if (trees >= 1000) {
-        trees -= 1000;
+    if (trees >= farm_price) {
+        trees -= farm_price;
         trees_per_second += 100;
+        farm_price*=1.5;
         showTrees();
     }
     }
 
 function buyForest() {
-    if (trees >= 10000) {
-        trees -= 10000;
+    if (trees >= forest_price) {
+        trees -= forest_price;
         trees_per_second += 1000;
+        forest_price*=1.5;
         showTrees();
     }
     }
 
 function buyPlanet() {
-    if (trees >= 100000) {
-        trees -= 100000;
+    if (trees >= planet_price) {
+        trees -= planet_price;
         trees_per_second += 10000;
+        planet_price*=1.5;
         showTrees();
     }
     }

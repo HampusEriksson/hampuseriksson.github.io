@@ -5,7 +5,7 @@ header.innerHTML = `<nav>
                       <ul>
                         <li><a href="index.html">Hem</a></li>
                         <li><a href="webb.html">Webbutveckling 1</a></li>
-                        <li><a href="cookie.html">Cookie-clicker</a></li>
+                        <li><a href="tree_clicker.html">Tree_clicker</a></li>
                       </ul>
                     </nav>`;
 

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin – Hjälplista</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Din CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <header></header>
+
+  <main class="container my-4 flex-grow-1">
+    <div class="card shadow-sm p-4" id="adminList">
+      <h2 class="text-center mb-3">Admin – Hjälpkö</h2>
+      <div class="text-center text-muted mb-3">
+        Här kan du ta bort vilken elev som helst från kön.
+      </div>
+
+      <ul class="list-group" id="queueList">
+        <li class="list-group-item text-muted">Ingen i kön just nu.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer></footer>
+
+  <script src="init.js"></script>
+
+  <!-- Firebase compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase init
+    const firebaseConfig = {
+      apiKey: "AIzaSyCijo0par89xZKZdrMzwN_04NVtAOWcoh4",
+      authDomain: "helplist-6fd88.firebaseapp.com",
+      databaseURL: "https://helplist-6fd88-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "helplist-6fd88",
+      storageBucket: "helplist-6fd88.firebasestorage.app",
+      messagingSenderId: "949969471330",
+      appId: "1:949969471330:web:97a22b20e65e7af46e4e3b",
+      measurementId: "G-FSTQZ0FH4S"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const queueList = document.getElementById('queueList');
+    const queueRef = db.ref('queue');
+
+    // Visa kön i realtid med ta bort-knapp
+    queueRef.on('value', snapshot => {
+      const data = snapshot.val();
+      queueList.innerHTML = '';
+
+      if (!data) {
+        queueList.innerHTML = '<li class="list-group-item text-muted">Ingen i kön just nu.</li>';
+        return;
+      }
+
+      Object.entries(data).forEach(([key, item]) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.textContent = item.name;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-sm btn-danger';
+        removeBtn.textContent = 'Ta bort';
+        removeBtn.addEventListener('click', () => {
+          db.ref('queue/' + key).remove();
+        });
+
+        li.appendChild(removeBtn);
+        queueList.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+Bilder som behövs för webbplatsen:
+
+INDEX.HTML:
+- hero-burger.jpg (huvudbild på startsidan - en aptitretande hamburgare med pommes)
+- restaurant-kitchen.jpg (köksbild för historiesektionen)
+
+FOOD.HTML:
+- classic-burger.jpg (klassisk hamburgare)
+- chicken-burger.jpg (kyckling hamburgare)
+- vegetarian-burger.jpg (vegetarisk hamburgare)
+- fries.jpg (pommes frites)
+- onion-rings.jpg (lökringa)
+- salad.jpg (färsk sallad)
+
+DRINKS.HTML:
+- cold-drinks.jpg (kalla drycker - läsk, juice etc.)
+- hot-drinks.jpg (varma drycker - kaffe, te etc.)
+
+ABOUT.HTML:
+- restaurant-story.jpg (bild som passar till restaurangens historia)
+
+LOCATIONS.HTML:
+- sweden-locations.jpg (bild som representerar Sverige/svenska orter)
+- denmark-locations.jpg (bild som representerar Danmark/danska orter)
+
+Alla bilder har fått CSS-klasser för enkel styling:
+- .hero-image (huvudbild)
+- .history-image (historiebilder)
+- .food-image (matbilder)
+- .drinks-image (dryckesbilder)
+- .about-image (om oss-bilder)
+- .location-image (ortsbilder)

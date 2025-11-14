@@ -1,0 +1,241 @@
+body {
+background-color: darkorange;
+color: red;
+font-family: 'Bangers', cursive;
+}
+
+nav {
+background-color: yellow;  
+border: 2px solid red; 
+margin: 20px;
+padding: 10px;
+align-items: center;
+text-align: center;
+font-size: 20px;
+font-weight: bold;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+position: sticky;
+top: 0;
+z-index: 1000;
+}
+
+img:hover {
+transform: scale(1.05);
+transition: transform 0.3s;
+}
+
+nav li {
+display: inline;
+margin: 0 15px;
+}
+
+nav a {
+text-decoration: none;
+color: red;
+}
+
+nav a:hover {
+text-decoration: underline;
+}
+
+h1 {
+font-size: 36px;
+color: red;
+text-align: center;
+margin-top: 20px;
+text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+.hero-image {
+display: block;
+margin: 20px auto;
+max-width: 100%;
+height: auto;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+p {
+font-size: 18px;   
+line-height: 1.6;
+margin: 20px;
+text-align: center;
+}
+
+section {
+background-color: yellow;
+margin: 50px;
+padding: 50px;
+border-radius: 10px;
+box-shadow: 5px 5px 15px black;
+border: red 5px solid;    
+
+}
+
+.history-image {
+display: block;
+margin: 20px auto;
+max-width: 100%;
+height: auto;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+ 
+
+.food-image {
+display: block;
+margin: 10px auto;
+width: 30%;
+height: auto;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+.food-item {
+margin-bottom: 30px;
+}
+.food-item h2 {
+font-size: 24px;
+color: red;
+margin-bottom: 10px;
+text-align: center;
+text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.menu-section {
+margin-bottom: 40px;
+}
+
+.burgers-section, .drinks-section {
+margin-bottom: 40px;
+}
+
+.item-description {
+font-size: 16px;
+line-height: 1.4;
+text-align: center;
+}
+.item-price {
+font-size: 16px;
+font-weight: bold;
+text-align: center;
+margin-top: 5px;
+}
+footer {
+color: red;
+background-color: yellow;
+text-align: center;
+padding: 10px;
+margin: 20px;
+font-size: 14px;
+border-radius: 10px;
+border: 3px solid red;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.drinks-page {
+margin: 20px;
+padding: 20px;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+border: red 2px solid;
+}
+.drink-image {
+display: block; 
+margin: 10px auto;
+width: 30%;
+height: auto;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+.drink-item {
+margin-bottom: 30px;
+}
+.drink-item h2 {
+font-size: 24px;
+color: red;
+margin-bottom: 10px;
+text-align: center;
+text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+.item-description {
+font-size: 16px;
+line-height: 1.4;
+text-align: center;
+}
+.item-price {
+font-size: 16px;
+font-weight: bold;
+text-align: center;
+margin-top: 5px;
+}
+
+.drinks-image {
+display: block;
+margin: 10px auto;
+width: 30%;
+height: auto;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+align-items: center;
+}
+
+.drinks-table {
+width: 80%;
+margin: 0 auto;
+border-collapse: collapse;
+}
+.drinks-table th, .drinks-table td {
+border: 1px solid red;
+padding: 10px;
+text-align: center;
+font-size: 19px;
+}
+
+.about-page {
+margin: 20px;
+padding: 20px;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+border: red 2px solid;
+}
+.history-image {
+display: block;
+margin: 20px auto;
+max-width: 100%;
+height: auto;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.about-image {
+display: block;
+margin: 20px auto;
+max-width: 70%;
+height: auto;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.location-image {
+display: block;
+margin: 20px auto;
+width: 30%;
+height: auto;
+border-radius: 10px;
+box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+
+}
+.city-list {
+list-style-type: none;
+padding: 0;
+text-align: center;
+}
+.city-list li {
+display: inline-block;
+margin: 0 15px;
+font-size: 18px;
+
+}
+
+

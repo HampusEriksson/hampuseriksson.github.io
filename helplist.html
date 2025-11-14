@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hjälplista</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Din CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <header></header>
+
+  <main class="container my-4 flex-grow-1">
+    <div class="card shadow-sm p-4" id="helplist">
+      <h2 class="text-center mb-3">Hjälpkö</h2>
+
+      <div class="row g-2 mb-3 align-items-center">
+        <div class="col-sm-8">
+          <input type="text" class="form-control" id="nameInput" placeholder="Ditt namn">
+        </div>
+        <div class="col-sm-4">
+          <button class="btn btn-primary w-100" id="joinBtn">Ställ mig i kö</button>
+        </div>
+      </div>
+
+      <div class="text-center text-muted mb-3" id="statusText">Skriv ditt namn och ställ dig i kön.</div>
+      <ul class="list-group" id="queueList">
+        <li class="list-group-item text-muted">Ingen i kön just nu.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer></footer>
+
+  <script src="init.js"></script>
+
+  <!-- Firebase compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Debug-friendly Firebase init + improved UI feedback
+    console.log('[helplist] script start');
+    const firebaseConfig = {
+      apiKey: "AIzaSyCijo0par89xZKZdrMzwN_04NVtAOWcoh4",
+      authDomain: "helplist-6fd88.firebaseapp.com",
+      databaseURL: "https://helplist-6fd88-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "helplist-6fd88",
+      storageBucket: "helplist-6fd88.firebasestorage.app",
+      messagingSenderId: "949969471330",
+      appId: "1:949969471330:web:97a22b20e65e7af46e4e3b",
+      measurementId: "G-FSTQZ0FH4S"
+    };
+
+    const nameInput = document.getElementById('nameInput');
+    const joinBtn = document.getElementById('joinBtn');
+    const queueList = document.getElementById('queueList');
+    const statusText = document.getElementById('statusText');
+
+    // Check that Firebase SDK loaded
+    if (typeof firebase === 'undefined' || !firebase.database) {
+      console.error('[helplist] Firebase SDK not loaded or firebase.database missing');
+      statusText.textContent = 'Fel: Firebase kunde inte laddas. Kontrollera nätverk/skriptordning i sidan.';
+    } else {
+      try {
+        // If app already initialised (e.g., admin page loaded earlier), don't init again
+        if (!firebase.apps || !firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+      } catch (e) {
+        console.warn('[helplist] initializeApp warning:', e);
+      }
+
+      const db = firebase.database();
+      const queueRef = db.ref('queue');
+
+      // Visa kön i realtid
+      queueRef.on('value', snapshot => {
+        const data = snapshot.val();
+        console.log('[helplist] queue snapshot', data);
+        queueList.innerHTML = '';
+
+        if (!data) {
+          queueList.innerHTML = '<li class="list-group-item text-muted">Ingen i kön just nu.</li>';
+          return;
+        }
+
+        const items = Object.values(data);
+        items.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'list-group-item';
+          li.textContent = item.name || '(namn saknas)';
+          queueList.appendChild(li);
+        });
+      }, err => {
+        console.error('[helplist] error reading queue:', err);
+        statusText.textContent = 'Fel vid hämtning av kön: ' + (err.message || err);
+      });
+
+      // Lägg till i kön (med bättre felhantering och disabled state)
+      joinBtn.addEventListener('click', async () => {
+        const name = nameInput.value.trim();
+        if (!name) {
+          statusText.textContent = 'Skriv ditt namn först.';
+          return;
+        }
+
+        joinBtn.disabled = true;
+        statusText.textContent = 'Skickar...';
+
+        try {
+          const snapshot = await queueRef.once('value');
+          const data = snapshot.val();
+          const names = data ? Object.values(data).map(x => x.name) : [];
+          if (names.includes(name)) {
+            statusText.textContent = 'Du är redan i kön!';
+            return;
+          }
+
+          await queueRef.push({ name, ts: Date.now() });
+          statusText.textContent = 'Du är nu i kön!';
+          nameInput.value = '';
+        } catch (err) {
+          console.error('[helplist] skrivfel:', err);
+          statusText.textContent = 'Fel: ' + (err.message || err);
+        } finally {
+          joinBtn.disabled = false;
+        }
+      });
+
+      // Tryck Enter = ställ sig i kön (modern event)
+      nameInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          joinBtn.click();
+        }
+      });
+    }
+  </script>
+</body>
+</html>

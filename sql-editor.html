@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <title>SQL-editor med autocomplete</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Ace Editor + autocomplete-extension -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ace.js" integrity="sha512-XxWxx9IYFmlt9b8r9p9QU4N1Yc4+NLti1g7u+G9k6o8BcZ9i0OwwgZk0+XkqG7zGm7G7Cv7o7gZ4zXXj9u0rVQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ext-language_tools.min.js" integrity="sha512-8uPJ4Lx1x7QqW0i2m4Ztciy1nH5m0PUkW2sWWb0uXzJgyI1GMa3mC1v7sPp8PHVtU2z+fQ5b0GkJ6kX1p0b7Xg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 0.6rem 0.9rem;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      background: #020617;
+    }
+    header h1 {
+      font-size: 1rem;
+      margin: 0;
+      margin-right: auto;
+      font-weight: 600;
+    }
+    header .meta {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+    #editor {
+      flex: 1;
+      width: 100%;
+    }
+    .hint {
+      padding: 0.35rem 0.9rem;
+      font-size: 0.8rem;
+      border-top: 1px solid #1e293b;
+      background: #020617;
+      color: #9ca3af;
+    }
+    .hint code {
+      background: #0b1120;
+      padding: 0.1rem 0.25rem;
+      border-radius: 3px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SQL-editor</h1>
+    <div class="meta">
+      Autocomplete för SQL + dina tabeller. Testa <code>SELECT</code> eller börja skriva tabelnamn.
+    </div>
+  </header>
+
+  <div id="editor">-- Skriv din SQL här
+-- Exempel:
+-- SELECT name, class FROM Students;
+-- SELECT subject, AVG(grade) FROM Grades GROUP BY subject;
+</div>
+
+  <div class="hint">
+    Tips: Tryck <code>Ctrl+Space</code> (Chromebook: <code>Ctrl+Mellanslag</code>) för att visa förslag.
+  </div>
+
+  <script>
+    // Initiera Ace
+    const editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/sql");
+    editor.setOptions({
+      fontSize: "14px",
+      enableBasicAutocompletion: true,
+      enableLiveAutocompletion: true,
+      enableSnippets: false,
+      showPrintMargin: false,
+    });
+
+    // Aktivera language tools
+    ace.require("ace/ext/language_tools");
+
+    // Egna tabeller/kolumner för autocomplete
+    const schemaWords = [
+      // Tabeller
+      { value: "Students", meta: "table" },
+      { value: "Grades", meta: "table" },
+
+      // Kolumner Students
+      { value: "id", meta: "Students.id" },
+      { value: "name", meta: "Students.name" },
+      { value: "class", meta: "Students.class" },
+
+      // Kolumner Grades
+      { value: "studentId", meta: "Grades.studentId" },
+      { value: "subject", meta: "Grades.subject" },
+      { value: "grade", meta: "Grades.grade" },
+
+      // Vanliga SQL-ord (några exempel)
+      { value: "SELECT", meta: "keyword" },
+      { value: "FROM", meta: "keyword" },
+      { value: "WHERE", meta: "keyword" },
+      { value: "GROUP BY", meta: "keyword" },
+      { value: "ORDER BY", meta: "keyword" },
+      { value: "INNER JOIN", meta: "keyword" },
+      { value: "LEFT JOIN", meta: "keyword" },
+      { value: "AVG", meta: "func" },
+      { value: "COUNT", meta: "func" },
+      { value: "MAX", meta: "func" },
+      { value: "MIN", meta: "func" },
+      { value: "DISTINCT", meta: "keyword" },
+    ];
+
+    const customCompleter = {
+      getCompletions: function (editor, session, pos, prefix, callback) {
+        if (!prefix) {
+          callback(null, []);
+          return;
+        }
+        const completions = schemaWords.map(w => ({
+          caption: w.value,
+          value: w.value,
+          meta: w.meta,
+          score: 1000
+        }));
+        callback(null, completions);
+      }
+    };
+
+    editor.completers = [customCompleter];
+  </script>
+</body>
+</html>

@@ -101,6 +101,66 @@
       display: flex;
       min-height: 0;
     }
+
+    /* --- Sidebar --- */
+    #sidebar {
+      width: 220px;
+      min-width: 150px;
+      max-width: 260px;
+      border-right: 1px solid #1e293b;
+      background: #020617;
+      display: flex;
+      flex-direction: column;
+      padding: 0.4rem 0.3rem 0.4rem 0.3rem;
+      font-size: 0.8rem;
+      overflow-y: auto;
+    }
+    #sidebar h2 {
+      font-size: 0.85rem;
+      margin: 0 0 0.3rem 0.3rem;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+    .table-item {
+      margin-bottom: 0.2rem;
+    }
+    .table-header {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .table-header:hover {
+      background: #0f172a;
+    }
+    .table-arrow {
+      font-size: 0.7rem;
+      width: 1rem;
+      text-align: center;
+      opacity: 0.7;
+    }
+    .table-name {
+      font-weight: 500;
+    }
+    .columns {
+      margin-left: 1.1rem;
+      margin-top: 0.1rem;
+      padding-left: 0.3rem;
+      border-left: 1px dashed #475569;
+      display: none;
+    }
+    .columns.open {
+      display: block;
+    }
+    .column-name {
+      padding: 0.05rem 0.1rem;
+      color: #cbd5f5;
+      word-break: break-all;
+    }
+
+    /* --- Editor / Resultat --- */
     #editorPane {
       flex: 0 0 60%;
       min-width: 0;
@@ -164,6 +224,9 @@
       .main {
         flex-direction: column;
       }
+      #sidebar {
+        display: none; /* göm sidomenyn på väldigt små skärmar om det krånglar */
+      }
       #editorPane, .right {
         flex: 0 0 auto;
         width: 100%;
@@ -201,6 +264,11 @@
   </div>
 
   <div class="main">
+    <aside id="sidebar">
+      <h2>Tabeller</h2>
+      <div id="sidebarContent">Ingen databas laddad ännu.</div>
+    </aside>
+
     <div id="editorPane">
       <div id="editor">-- Databasen mondial.db är förladdad.
 -- Exempel:
@@ -210,6 +278,7 @@
 -- GROUP BY Country.name;
 </div>
     </div>
+
     <div class="right">
       <h2>Resultat</h2>
       <div id="results">Ingen fråga körd ännu.</div>
@@ -236,6 +305,7 @@
     const layoutEditorBtn = document.getElementById("layoutEditor");
     const layoutEqualBtn = document.getElementById("layoutEqual");
     const layoutResultBtn = document.getElementById("layoutResult");
+    const sidebarContent = document.getElementById("sidebarContent");
 
     function setStatus(msg) {
       statusEl.textContent = msg;
@@ -382,20 +452,95 @@
       resultsEl.appendChild(table);
     }
 
+    // ----- Sidebar & schema -----
+    function renderSidebarFromDb() {
+      if (!db) {
+        sidebarContent.textContent = "Ingen databas laddad.";
+        return;
+      }
+
+      sidebarContent.innerHTML = "";
+
+      try {
+        const tablesRes = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
+        if (!tablesRes.length) {
+          sidebarContent.textContent = "Inga tabeller hittades.";
+          return;
+        }
+
+        const tableNames = tablesRes[0].values.map(row => row[0]);
+
+        tableNames.forEach(tnameRaw => {
+          const tname = String(tnameRaw);
+
+          const tableDiv = document.createElement("div");
+          tableDiv.className = "table-item";
+
+          const header = document.createElement("div");
+          header.className = "table-header";
+
+          const arrow = document.createElement("span");
+          arrow.className = "table-arrow";
+          arrow.textContent = "▶";
+
+          const nameSpan = document.createElement("span");
+          nameSpan.className = "table-name";
+          nameSpan.textContent = tname;
+
+          header.appendChild(arrow);
+          header.appendChild(nameSpan);
+          tableDiv.appendChild(header);
+
+          const colsDiv = document.createElement("div");
+          colsDiv.className = "columns";
+
+          // hämta kolumner för tabellen
+          try {
+            const infoRes = db.exec(`PRAGMA table_info('${tname.replace(/'/g, "''")}')`);
+            if (infoRes.length) {
+              infoRes[0].values.forEach(colRow => {
+                const colName = String(colRow[1]);
+                const colDiv = document.createElement("div");
+                colDiv.className = "column-name";
+                colDiv.textContent = colName;
+                colsDiv.appendChild(colDiv);
+              });
+            }
+          } catch (e) {
+            console.warn("Kunde inte läsa kolumner för tabell", tname, e);
+          }
+
+          tableDiv.appendChild(colsDiv);
+
+          header.addEventListener("click", () => {
+            const isOpen = colsDiv.classList.contains("open");
+            colsDiv.classList.toggle("open", !isOpen);
+            arrow.textContent = isOpen ? "▶" : "▼";
+          });
+
+          sidebarContent.appendChild(tableDiv);
+        });
+
+      } catch (e) {
+        console.warn("Kunde inte rendera sidebar:", e);
+        sidebarContent.textContent = "Fel vid läsning av schema.";
+      }
+    }
+
     function updateSchemaFromDb() {
       const words = [...baseWords];
       try {
         const tablesRes = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
         if (tablesRes.length) {
           const tableNames = tablesRes[0].values.map(row => row[0]);
-          tableNames.forEach(tname => {
-            const t = String(tname);
-            words.push({ value: t, meta: "table" });
-            const info = db.exec(`PRAGMA table_info('${t.replace(/'/g, "''")}')`);
+          tableNames.forEach(tnameRaw => {
+            const tname = String(tnameRaw);
+            words.push({ value: tname, meta: "table" });
+            const info = db.exec(`PRAGMA table_info('${tname.replace(/'/g, "''")}')`);
             if (info.length) {
               info[0].values.forEach(colRow => {
                 const colName = String(colRow[1]);
-                words.push({ value: colName, meta: `${t}.${colName}` });
+                words.push({ value: colName, meta: `${tname}.${colName}` });
               });
             }
           });
@@ -404,6 +549,7 @@
         console.warn("Kunde inte läsa schema:", e);
       }
       schemaWords = words;
+      renderSidebarFromDb();
     }
 
     function loadDbFromBuffer(buffer) {
@@ -424,6 +570,7 @@
       } catch (e) {
         console.error(e);
         setStatus("Fel: mondial.db kunde inte laddas.");
+        sidebarContent.textContent = "Kunde inte ladda mondial.db.";
       }
     }
 
@@ -437,6 +584,7 @@
     }).catch(err => {
       console.error(err);
       setStatus("Kunde inte ladda SQLite-motorn.");
+      sidebarContent.textContent = "Kunde inte starta SQLite.";
     });
 
     runBtn.addEventListener("click", () => {

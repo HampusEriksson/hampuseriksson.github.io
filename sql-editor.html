@@ -89,18 +89,33 @@
       font-size: 0.8rem;
       color: #9ca3af;
     }
+
     .main {
       flex: 1;
       display: flex;
       min-height: 0;
     }
+    #editorPane {
+      flex: 0 0 60%;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
     #editor {
       flex: 1;
-      min-width: 0;
+      width: 100%;
+    }
+    #divider {
+      width: 4px;
+      cursor: col-resize;
+      background: #1e293b;
+    }
+    #divider:hover {
+      background: #38bdf8;
     }
     .right {
-      width: 40%;
-      min-width: 260px;
+      flex: 0 0 40%;
+      min-width: 200px;
       border-left: 1px solid #1e293b;
       display: flex;
       flex-direction: column;
@@ -146,13 +161,22 @@
       padding: 0.1rem 0.25rem;
       border-radius: 3px;
     }
+
     @media (max-width: 900px) {
       .main {
         flex-direction: column;
       }
-      .right {
+      #divider {
+        display: none;
+      }
+      #editorPane, .right {
+        flex: 0 0 auto;
         width: 100%;
         min-height: 40%;
+      }
+      .right {
+        border-left: none;
+        border-top: 1px solid #1e293b;
       }
     }
   </style>
@@ -178,14 +202,16 @@
   </div>
 
   <div class="main">
-    <div id="editor">-- Databasen mondial.db är förladdad.
+    <div id="editorPane">
+      <div id="editor">-- Databasen mondial.db är förladdad.
 -- Exempel:
 -- SELECT * FROM City LIMIT 10;
 -- SELECT Country.name, COUNT(*) 
 -- FROM City JOIN Country ON City.country = Country.code 
 -- GROUP BY Country.name;
 </div>
-
+    </div>
+    <div id="divider" title="Dra för att ändra storlek"></div>
     <div class="right">
       <h2>Resultat</h2>
       <div id="results">Ingen fråga körd ännu.</div>
@@ -429,6 +455,41 @@
         resultsEl.textContent = "Fel: " + e.message;
         setStatus("Fel i SQL.");
       }
+    });
+
+    // ----- Dragbar splitter -----
+    const mainEl = document.querySelector(".main");
+    const editorPane = document.getElementById("editorPane");
+    const rightPane = document.querySelector(".right");
+    const divider = document.getElementById("divider");
+
+    let isDragging = false;
+
+    divider.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      document.body.style.userSelect = "none";
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      const rect = mainEl.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      const min = rect.width * 0.15;
+      const max = rect.width * 0.85;
+      if (x < min) x = min;
+      if (x > max) x = max;
+
+      const editorPct = (x / rect.width) * 100;
+      const rightPct = 100 - editorPct;
+
+      editorPane.style.flex = `0 0 ${editorPct}%`;
+      rightPane.style.flex = `0 0 ${rightPct}%`;
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (!isDragging) return;
+      isDragging = false;
+      document.body.style.userSelect = "";
     });
   </script>
 </body>

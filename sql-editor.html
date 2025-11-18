@@ -2,34 +2,35 @@
 <html lang="sv">
 <head>
   <meta charset="utf-8" />
-  <title>SQL-editor med autocomplete</title>
+  <title>SQL-editor med autocomplete & SQLite</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Ace Editor + autocomplete-extension (utan integrity/crossorigin) -->
+  <!-- Ace Editor + autocomplete (utan integrity/crossorigin) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ace.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ext-language_tools.min.js"></script>
 
+  <!-- sql.js (SQLite i browsern) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0f172a;
+      background: #020617;
       color: #e5e7eb;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
     header {
-      padding: 0.6rem 0.9rem;
+      padding: 0.5rem 0.9rem;
       border-bottom: 1px solid #1e293b;
+      background: #020617;
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       align-items: center;
-      background: #020617;
     }
     header h1 {
       font-size: 1rem;
@@ -41,13 +42,84 @@
       font-size: 0.8rem;
       opacity: 0.8;
     }
+    .toolbar {
+      padding: 0.4rem 0.9rem;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      background: #020617;
+    }
+    button {
+      padding: 0.25rem 0.6rem;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1e293b;
+    }
+    input[type="file"] {
+      font-size: 0.8rem;
+    }
+    .status {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-left: auto;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
     #editor {
       flex: 1;
+      min-width: 0;
+    }
+    .right {
+      width: 40%;
+      min-width: 260px;
+      border-left: 1px solid #1e293b;
+      display: flex;
+      flex-direction: column;
+      max-height: 100%;
+    }
+    .right h2 {
+      font-size: 0.85rem;
+      margin: 0;
+      padding: 0.4rem 0.7rem;
+      border-bottom: 1px solid #1e293b;
+      background: #020617;
+    }
+    #results {
+      flex: 1;
+      overflow: auto;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.8rem;
+    }
+    table {
+      border-collapse: collapse;
       width: 100%;
+      font-size: 0.8rem;
+      background: #020617;
+    }
+    th, td {
+      border: 1px solid #1f2937;
+      padding: 0.2rem 0.3rem;
+      text-align: left;
+    }
+    th {
+      background: #111827;
+      position: sticky;
+      top: 0;
     }
     .hint {
-      padding: 0.35rem 0.9rem;
-      font-size: 0.8rem;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.75rem;
       border-top: 1px solid #1e293b;
       background: #020617;
       color: #9ca3af;
@@ -56,7 +128,16 @@
       background: #0b1120;
       padding: 0.1rem 0.25rem;
       border-radius: 3px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
+    }
+    @media (max-width: 900px) {
+      .main {
+        flex-direction: column;
+      }
+      .right {
+        width: 100%;
+        min-height: 40%;
+      }
     }
   </style>
 </head>
@@ -64,23 +145,54 @@
   <header>
     <h1>SQL-editor</h1>
     <div class="meta">
-      Autocomplete för SQL + dina tabeller. Testa <code>SELECT</code> eller börja skriva tabelnamn.
+      SQLite i browsern med autocomplete. Skriv SQL till vänster, resultat till höger.
     </div>
   </header>
 
-  <div id="editor">-- Skriv din SQL här
+  <div class="toolbar">
+    <button id="runBtn">Kör fråga</button>
+    <button id="loadMondialBtn">Ladda exempeldatabas (mondial.db)</button>
+    <label>
+      <span style="font-size:0.8rem;">Öppna egen .db:</span>
+      <input type="file" id="fileInput" accept=".db,.sqlite" />
+    </label>
+    <div class="status" id="statusText">Laddar SQLite...</div>
+  </div>
+
+  <div class="main">
+    <div id="editor">-- Skriv din SQL här
 -- Exempel:
--- SELECT name, class FROM Students;
--- SELECT subject, AVG(grade) FROM Grades GROUP BY subject;
+-- SELECT * FROM City LIMIT 10;
+-- SELECT Country.name, COUNT(*) FROM City JOIN Country ON City.country = Country.code GROUP BY Country.name;
 </div>
+    <div class="right">
+      <h2>Resultat</h2>
+      <div id="results">Ingen fråga körd ännu.</div>
+    </div>
+  </div>
 
   <div class="hint">
-    Tips: Tryck <code>Ctrl+Space</code> (Chromebook: <code>Ctrl+Mellanslag</code>) för att visa förslag.
+    Tips: Tryck <code>Ctrl+Space</code> (Chromebook: <code>Ctrl+Mellanslag</code>) för att visa förslag. När en databas
+    är laddad kommer tabell- och kolumnnamn från den också dyka upp som förslag.
   </div>
 
   <script>
-    // Initiera Ace
-    const editor = ace.edit("editor");
+    let editor;
+    let SQL = null;
+    let db = null;
+
+    const statusEl = document.getElementById("statusText");
+    const resultsEl = document.getElementById("results");
+    const fileInput = document.getElementById("fileInput");
+    const runBtn = document.getElementById("runBtn");
+    const loadMondialBtn = document.getElementById("loadMondialBtn");
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    // ----- ACE -----
+    editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");
     editor.session.setMode("ace/mode/sql");
     editor.setOptions({
@@ -89,29 +201,12 @@
       enableLiveAutocompletion: true,
       enableSnippets: false,
       showPrintMargin: false,
-      wrap: true,          // radbrytning på
+      wrap: true
     });
-
-    // Aktivera language tools
     ace.require("ace/ext/language_tools");
 
-    // Egna tabeller/kolumner för autocomplete
-    const schemaWords = [
-      // Tabeller
-      { value: "Students", meta: "table" },
-      { value: "Grades", meta: "table" },
-
-      // Kolumner Students
-      { value: "id", meta: "Students.id" },
-      { value: "name", meta: "Students.name" },
-      { value: "class", meta: "Students.class" },
-
-      // Kolumner Grades
-      { value: "studentId", meta: "Grades.studentId" },
-      { value: "subject", meta: "Grades.subject" },
-      { value: "grade", meta: "Grades.grade" },
-
-      // Vanliga SQL-ord (några exempel)
+    // Bas-ord för autocomplete (SQL-nyckelord)
+    const baseWords = [
       { value: "SELECT", meta: "keyword" },
       { value: "FROM", meta: "keyword" },
       { value: "WHERE", meta: "keyword" },
@@ -119,12 +214,17 @@
       { value: "ORDER BY", meta: "keyword" },
       { value: "INNER JOIN", meta: "keyword" },
       { value: "LEFT JOIN", meta: "keyword" },
-      { value: "AVG", meta: "func" },
+      { value: "RIGHT JOIN", meta: "keyword" },
+      { value: "ON", meta: "keyword" },
+      { value: "LIMIT", meta: "keyword" },
+      { value: "DISTINCT", meta: "keyword" },
       { value: "COUNT", meta: "func" },
+      { value: "AVG", meta: "func" },
       { value: "MAX", meta: "func" },
       { value: "MIN", meta: "func" },
-      { value: "DISTINCT", meta: "keyword" },
+      { value: "SUM", meta: "func" }
     ];
+    let schemaWords = [...baseWords];
 
     const customCompleter = {
       getCompletions: function (editor, session, pos, prefix, callback) {
@@ -141,8 +241,155 @@
         callback(null, completions);
       }
     };
-
     editor.completers = [customCompleter];
+
+    function clearResults() {
+      resultsEl.textContent = "Ingen fråga körd ännu.";
+    }
+
+    function renderResultSet(res) {
+      if (!res || !res.length) {
+        resultsEl.textContent = "Frågan gav inga rader.";
+        return;
+      }
+
+      const r = res[0]; // första resultset
+      const cols = r.columns;
+      const rows = r.values;
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+
+      const trHead = document.createElement("tr");
+      cols.forEach(c => {
+        const th = document.createElement("th");
+        th.textContent = c;
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+          const td = document.createElement("td");
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+
+      resultsEl.innerHTML = "";
+      resultsEl.appendChild(table);
+    }
+
+    function updateSchemaFromDb() {
+      if (!db) {
+        schemaWords = [...baseWords];
+        return;
+      }
+      const words = [...baseWords];
+
+      try {
+        const tablesRes = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
+        if (tablesRes.length) {
+          const tableNames = tablesRes[0].values.map(row => row[0]);
+          tableNames.forEach(tname => {
+            words.push({ value: String(tname), meta: "table" });
+            try {
+              const infoRes = db.exec(`PRAGMA table_info('${String(tname).replace(/'/g, "''")}')`);
+              if (infoRes.length) {
+                infoRes[0].values.forEach(colRow => {
+                  const colName = colRow[1];
+                  words.push({ value: String(colName), meta: `${tname}.${colName}` });
+                });
+              }
+            } catch (e) {
+              console.warn("Kunde inte läsa kolumner för tabell", tname, e);
+            }
+          });
+        }
+      } catch (e) {
+        console.warn("Kunde inte läsa schema från databas:", e);
+      }
+
+      schemaWords = words;
+    }
+
+    function loadDbFromBuffer(buffer) {
+      try {
+        if (db) {
+          db.close();
+        }
+        db = new SQL.Database(new Uint8Array(buffer));
+        setStatus("Databas laddad.");
+        clearResults();
+        updateSchemaFromDb();
+      } catch (e) {
+        console.error(e);
+        setStatus("Fel vid laddning av databas.");
+      }
+    }
+
+    // ----- sql.js init -----
+    initSqlJs({
+      locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
+    }).then(SQLLib => {
+      SQL = SQLLib;
+      setStatus("SQLite redo. Ladda mondial.db eller en egen .db.");
+    }).catch(err => {
+      console.error(err);
+      setStatus("Kunde inte ladda SQLite-motorn.");
+    });
+
+    // ----- event handlers -----
+    runBtn.addEventListener("click", () => {
+      if (!db) {
+        setStatus("Ingen databas laddad.");
+        return;
+      }
+      const sql = editor.getValue().trim();
+      if (!sql) {
+        setStatus("Ingen SQL att köra.");
+        return;
+      }
+      try {
+        const res = db.exec(sql);
+        renderResultSet(res);
+        setStatus("Fråga körd.");
+      } catch (e) {
+        console.error(e);
+        resultsEl.textContent = "Fel: " + e.message;
+        setStatus("Fel i frågan.");
+      }
+    });
+
+    fileInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        loadDbFromBuffer(ev.target.result);
+      };
+      reader.readAsArrayBuffer(file);
+      setStatus("Laddar " + file.name + "...");
+    });
+
+    loadMondialBtn.addEventListener("click", async () => {
+      setStatus("Försöker ladda mondial.db...");
+      try {
+        const resp = await fetch("mondial.db");
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const buf = await resp.arrayBuffer();
+        loadDbFromBuffer(buf);
+      } catch (e) {
+        console.error(e);
+        setStatus("Kunde inte ladda mondial.db. Ligger den i samma mapp som html-filen?");
+      }
+    });
   </script>
 </body>
 </html>

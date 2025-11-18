@@ -5,9 +5,9 @@
   <title>SQL-editor med autocomplete</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Ace Editor + autocomplete-extension -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ace.js" integrity="sha512-XxWxx9IYFmlt9b8r9p9QU4N1Yc4+NLti1g7u+G9k6o8BcZ9i0OwwgZk0+XkqG7zGm7G7Cv7o7gZ4zXXj9u0rVQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ext-language_tools.min.js" integrity="sha512-8uPJ4Lx1x7QqW0i2m4Ztciy1nH5m0PUkW2sWWb0uXzJgyI1GMa3mC1v7sPp8PHVtU2z+fQ5b0GkJ6kX1p0b7Xg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Ace Editor + autocomplete-extension (utan integrity/crossorigin) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ace.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ext-language_tools.min.js"></script>
 
   <style>
     * {
@@ -89,6 +89,7 @@
       enableLiveAutocompletion: true,
       enableSnippets: false,
       showPrintMargin: false,
+      wrap: true,          // radbrytning på
     });
 
     // Aktivera language tools

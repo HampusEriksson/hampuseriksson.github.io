@@ -2,10 +2,10 @@
 <html lang="sv">
 <head>
   <meta charset="utf-8" />
-  <title>SQL-editor med autocomplete & SQLite</title>
+  <title>SQL-editor med autocomplete & SQLite (mondial)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Ace Editor + autocomplete (utan integrity/crossorigin) -->
+  <!-- Ace Editor + autocomplete -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ace.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.3/ext-language_tools.min.js"></script>
 
@@ -46,7 +46,6 @@
       padding: 0.4rem 0.9rem;
       border-bottom: 1px solid #1e293b;
       display: flex;
-      flex-wrap: wrap;
       gap: 0.5rem;
       align-items: center;
       background: #020617;
@@ -60,12 +59,7 @@
       color: #e5e7eb;
       cursor: pointer;
     }
-    button:hover {
-      background: #1e293b;
-    }
-    input[type="file"] {
-      font-size: 0.8rem;
-    }
+    button:hover { background: #1e293b; }
     .status {
       font-size: 0.8rem;
       color: #9ca3af;
@@ -105,7 +99,6 @@
       border-collapse: collapse;
       width: 100%;
       font-size: 0.8rem;
-      background: #020617;
     }
     th, td {
       border: 1px solid #1f2937;
@@ -128,43 +121,29 @@
       background: #0b1120;
       padding: 0.1rem 0.25rem;
       border-radius: 3px;
-      font-size: 0.75rem;
-    }
-    @media (max-width: 900px) {
-      .main {
-        flex-direction: column;
-      }
-      .right {
-        width: 100%;
-        min-height: 40%;
-      }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>SQL-editor</h1>
-    <div class="meta">
-      SQLite i browsern med autocomplete. Skriv SQL till vänster, resultat till höger.
-    </div>
+    <h1>SQL-editor (mondial)</h1>
+    <div class="meta">Databasen <code>mondial.db</code> laddas automatiskt.</div>
   </header>
 
   <div class="toolbar">
     <button id="runBtn">Kör fråga</button>
-    <button id="loadMondialBtn">Ladda exempeldatabas (mondial.db)</button>
-    <label>
-      <span style="font-size:0.8rem;">Öppna egen .db:</span>
-      <input type="file" id="fileInput" accept=".db,.sqlite" />
-    </label>
     <div class="status" id="statusText">Laddar SQLite...</div>
   </div>
 
   <div class="main">
-    <div id="editor">-- Skriv din SQL här
+    <div id="editor">-- Databasen mondial.db är förladdad.
 -- Exempel:
 -- SELECT * FROM City LIMIT 10;
--- SELECT Country.name, COUNT(*) FROM City JOIN Country ON City.country = Country.code GROUP BY Country.name;
+-- SELECT Country.name, COUNT(*) 
+-- FROM City JOIN Country ON City.country = Country.code 
+-- GROUP BY Country.name;
 </div>
+
     <div class="right">
       <h2>Resultat</h2>
       <div id="results">Ingen fråga körd ännu.</div>
@@ -172,20 +151,16 @@
   </div>
 
   <div class="hint">
-    Tips: Tryck <code>Ctrl+Space</code> (Chromebook: <code>Ctrl+Mellanslag</code>) för att visa förslag. När en databas
-    är laddad kommer tabell- och kolumnnamn från den också dyka upp som förslag.
+    Tryck <code>Shift + Enter</code> för att köra query.  
+    Tryck <code>Ctrl + Space</code> för autocomplete.
   </div>
 
   <script>
-    let editor;
-    let SQL = null;
-    let db = null;
+    let editor, SQL, db;
 
     const statusEl = document.getElementById("statusText");
     const resultsEl = document.getElementById("results");
-    const fileInput = document.getElementById("fileInput");
     const runBtn = document.getElementById("runBtn");
-    const loadMondialBtn = document.getElementById("loadMondialBtn");
 
     function setStatus(msg) {
       statusEl.textContent = msg;
@@ -205,7 +180,16 @@
     });
     ace.require("ace/ext/language_tools");
 
-    // Bas-ord för autocomplete (SQL-nyckelord)
+    // SHIFT + Enter = kör query
+    editor.commands.addCommand({
+      name: "runQueryShiftEnter",
+      bindKey: { win: "Shift-Enter", mac: "Shift-Enter" },
+      exec: function(editor) {
+        runBtn.click();
+      }
+    });
+
+    // Bas-ord för autocomplete
     const baseWords = [
       { value: "SELECT", meta: "keyword" },
       { value: "FROM", meta: "keyword" },
@@ -217,21 +201,18 @@
       { value: "RIGHT JOIN", meta: "keyword" },
       { value: "ON", meta: "keyword" },
       { value: "LIMIT", meta: "keyword" },
-      { value: "DISTINCT", meta: "keyword" },
       { value: "COUNT", meta: "func" },
       { value: "AVG", meta: "func" },
       { value: "MAX", meta: "func" },
       { value: "MIN", meta: "func" },
       { value: "SUM", meta: "func" }
     ];
+
     let schemaWords = [...baseWords];
 
     const customCompleter = {
-      getCompletions: function (editor, session, pos, prefix, callback) {
-        if (!prefix) {
-          callback(null, []);
-          return;
-        }
+      getCompletions: function(editor, session, pos, prefix, callback) {
+        if (!prefix) return callback(null, []);
         const completions = schemaWords.map(w => ({
           caption: w.value,
           value: w.value,
@@ -253,7 +234,7 @@
         return;
       }
 
-      const r = res[0]; // första resultset
+      const r = res[0];
       const cols = r.columns;
       const rows = r.values;
 
@@ -281,113 +262,70 @@
 
       table.appendChild(thead);
       table.appendChild(tbody);
-
       resultsEl.innerHTML = "";
       resultsEl.appendChild(table);
     }
 
     function updateSchemaFromDb() {
-      if (!db) {
-        schemaWords = [...baseWords];
-        return;
-      }
       const words = [...baseWords];
-
       try {
         const tablesRes = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
         if (tablesRes.length) {
           const tableNames = tablesRes[0].values.map(row => row[0]);
           tableNames.forEach(tname => {
             words.push({ value: String(tname), meta: "table" });
-            try {
-              const infoRes = db.exec(`PRAGMA table_info('${String(tname).replace(/'/g, "''")}')`);
-              if (infoRes.length) {
-                infoRes[0].values.forEach(colRow => {
-                  const colName = colRow[1];
-                  words.push({ value: String(colName), meta: `${tname}.${colName}` });
-                });
-              }
-            } catch (e) {
-              console.warn("Kunde inte läsa kolumner för tabell", tname, e);
+            const info = db.exec(`PRAGMA table_info('${tname}')`);
+            if (info.length) {
+              info[0].values.forEach(colRow => {
+                const col = colRow[1];
+                words.push({ value: col, meta: `${tname}.${col}` });
+              });
             }
           });
         }
-      } catch (e) {
-        console.warn("Kunde inte läsa schema från databas:", e);
-      }
-
+      } catch (e) {}
       schemaWords = words;
     }
 
     function loadDbFromBuffer(buffer) {
+      if (db) db.close();
+      db = new SQL.Database(new Uint8Array(buffer));
+      setStatus("Databas mondial.db laddad.");
+      clearResults();
+      updateSchemaFromDb();
+    }
+
+    async function loadMondial() {
+      setStatus("Laddar mondial.db...");
       try {
-        if (db) {
-          db.close();
-        }
-        db = new SQL.Database(new Uint8Array(buffer));
-        setStatus("Databas laddad.");
-        clearResults();
-        updateSchemaFromDb();
+        const resp = await fetch("mondial.db");
+        const buf = await resp.arrayBuffer();
+        loadDbFromBuffer(buf);
       } catch (e) {
-        console.error(e);
-        setStatus("Fel vid laddning av databas.");
+        setStatus("Fel: mondial.db kunde inte laddas.");
       }
     }
 
-    // ----- sql.js init -----
+    // Init sql.js
     initSqlJs({
       locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
     }).then(SQLLib => {
       SQL = SQLLib;
-      setStatus("SQLite redo. Ladda mondial.db eller en egen .db.");
-    }).catch(err => {
-      console.error(err);
-      setStatus("Kunde inte ladda SQLite-motorn.");
+      setStatus("SQLite redo, laddar mondial...");
+      loadMondial();
     });
 
-    // ----- event handlers -----
     runBtn.addEventListener("click", () => {
-      if (!db) {
-        setStatus("Ingen databas laddad.");
-        return;
-      }
+      if (!db) return setStatus("Databas ej laddad.");
       const sql = editor.getValue().trim();
-      if (!sql) {
-        setStatus("Ingen SQL att köra.");
-        return;
-      }
+      if (!sql) return;
       try {
         const res = db.exec(sql);
         renderResultSet(res);
         setStatus("Fråga körd.");
       } catch (e) {
-        console.error(e);
         resultsEl.textContent = "Fel: " + e.message;
-        setStatus("Fel i frågan.");
-      }
-    });
-
-    fileInput.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        loadDbFromBuffer(ev.target.result);
-      };
-      reader.readAsArrayBuffer(file);
-      setStatus("Laddar " + file.name + "...");
-    });
-
-    loadMondialBtn.addEventListener("click", async () => {
-      setStatus("Försöker ladda mondial.db...");
-      try {
-        const resp = await fetch("mondial.db");
-        if (!resp.ok) throw new Error("HTTP " + resp.status);
-        const buf = await resp.arrayBuffer();
-        loadDbFromBuffer(buf);
-      } catch (e) {
-        console.error(e);
-        setStatus("Kunde inte ladda mondial.db. Ligger den i samma mapp som html-filen?");
+        setStatus("Fel i SQL.");
       }
     });
   </script>

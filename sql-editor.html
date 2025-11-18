@@ -43,12 +43,31 @@
       opacity: 0.8;
     }
     .toolbar {
-      padding: 0.4rem 0.9rem;
+      padding: 0.2rem 0.9rem 0.4rem 0.9rem;
       border-bottom: 1px solid #1e293b;
       display: flex;
-      gap: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.4rem;
       align-items: center;
       background: #020617;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    .tab-btn {
+      padding: 0.2rem 0.6rem;
+      font-size: 0.78rem;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #0f172a;
+      border-color: #38bdf8;
     }
     button {
       padding: 0.25rem 0.6rem;
@@ -60,10 +79,15 @@
       cursor: pointer;
     }
     button:hover { background: #1e293b; }
+    .toolbar-right {
+      margin-left: auto;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
     .status {
       font-size: 0.8rem;
       color: #9ca3af;
-      margin-left: auto;
     }
     .main {
       flex: 1;
@@ -122,6 +146,15 @@
       padding: 0.1rem 0.25rem;
       border-radius: 3px;
     }
+    @media (max-width: 900px) {
+      .main {
+        flex-direction: column;
+      }
+      .right {
+        width: 100%;
+        min-height: 40%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -131,8 +164,17 @@
   </header>
 
   <div class="toolbar">
-    <button id="runBtn">Kör fråga</button>
-    <div class="status" id="statusText">Laddar SQLite...</div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="0">Query 1</button>
+      <button class="tab-btn" data-tab="1">Query 2</button>
+      <button class="tab-btn" data-tab="2">Query 3</button>
+      <button class="tab-btn" data-tab="3">Query 4</button>
+      <button class="tab-btn" data-tab="4">Query 5</button>
+    </div>
+    <div class="toolbar-right">
+      <button id="runBtn">Kör fråga</button>
+      <div class="status" id="statusText">Laddar SQLite...</div>
+    </div>
   </div>
 
   <div class="main">
@@ -151,8 +193,11 @@
   </div>
 
   <div class="hint">
-    Tryck <code>Shift + Enter</code> för att köra query.  
-    Tryck <code>Ctrl + Space</code> för autocomplete.
+    <strong>Tangentbord:</strong>
+    <ul style="margin:0.2rem 0 0; padding-left:1.1rem;">
+      <li><code>Shift + Enter</code> – kör query i aktuell flik</li>
+      <li><code>Ctrl + Space</code> – visa autocomplete</li>
+    </ul>
   </div>
 
   <script>
@@ -161,6 +206,7 @@
     const statusEl = document.getElementById("statusText");
     const resultsEl = document.getElementById("results");
     const runBtn = document.getElementById("runBtn");
+    const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
 
     function setStatus(msg) {
       statusEl.textContent = msg;
@@ -184,12 +230,54 @@
     editor.commands.addCommand({
       name: "runQueryShiftEnter",
       bindKey: { win: "Shift-Enter", mac: "Shift-Enter" },
-      exec: function(editor) {
+      exec: function(editorInstance) {
         runBtn.click();
       }
     });
 
-    // Bas-ord för autocomplete
+    // ----- Flik-logik -----
+    const initialSql = editor.getValue();
+    let tabs = [
+      initialSql, // Query 1
+      "",         // Query 2
+      "",         // Query 3
+      "",         // Query 4
+      ""          // Query 5
+    ];
+    let activeTab = 0;
+
+    function updateTabUi() {
+      tabButtons.forEach(btn => {
+        const idx = Number(btn.dataset.tab);
+        if (idx === activeTab) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    function switchTab(newIndex) {
+      if (newIndex === activeTab) return;
+      // Spara nuvarande innehåll i nuvarande flik
+      tabs[activeTab] = editor.getValue();
+      activeTab = newIndex;
+      const content = tabs[activeTab] || "";
+      editor.setValue(content, -1); // -1 = behåll caret högst upp utan undo-steg
+      updateTabUi();
+      setStatus(`Aktiv flik: Query ${activeTab + 1}`);
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.tab);
+        switchTab(idx);
+      });
+    });
+
+    updateTabUi();
+
+    // ----- Autocomplete -----
     const baseWords = [
       { value: "SELECT", meta: "keyword" },
       { value: "FROM", meta: "keyword" },
@@ -273,17 +361,20 @@
         if (tablesRes.length) {
           const tableNames = tablesRes[0].values.map(row => row[0]);
           tableNames.forEach(tname => {
-            words.push({ value: String(tname), meta: "table" });
-            const info = db.exec(`PRAGMA table_info('${tname}')`);
+            const t = String(tname);
+            words.push({ value: t, meta: "table" });
+            const info = db.exec(`PRAGMA table_info('${t.replace(/'/g, "''")}')`);
             if (info.length) {
               info[0].values.forEach(colRow => {
-                const col = colRow[1];
-                words.push({ value: col, meta: `${tname}.${col}` });
+                const colName = String(colRow[1]);
+                words.push({ value: colName, meta: `${t}.${colName}` });
               });
             }
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Kunde inte läsa schema:", e);
+      }
       schemaWords = words;
     }
 
@@ -299,9 +390,11 @@
       setStatus("Laddar mondial.db...");
       try {
         const resp = await fetch("mondial.db");
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
         const buf = await resp.arrayBuffer();
         loadDbFromBuffer(buf);
       } catch (e) {
+        console.error(e);
         setStatus("Fel: mondial.db kunde inte laddas.");
       }
     }
@@ -313,16 +406,25 @@
       SQL = SQLLib;
       setStatus("SQLite redo, laddar mondial...");
       loadMondial();
+    }).catch(err => {
+      console.error(err);
+      setStatus("Kunde inte ladda SQLite-motorn.");
     });
 
     runBtn.addEventListener("click", () => {
-      if (!db) return setStatus("Databas ej laddad.");
+      if (!db) {
+        setStatus("Databas ej laddad.");
+        return;
+      }
       const sql = editor.getValue().trim();
-      if (!sql) return;
+      if (!sql) {
+        setStatus("Ingen SQL att köra.");
+        return;
+      }
       try {
         const res = db.exec(sql);
         renderResultSet(res);
-        setStatus("Fråga körd.");
+        setStatus(`Fråga körd (Query ${activeTab + 1}).`);
       } catch (e) {
         resultsEl.textContent = "Fel: " + e.message;
         setStatus("Fel i SQL.");

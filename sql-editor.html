@@ -271,11 +271,6 @@
 
     <div id="editorPane">
       <div id="editor">-- Databasen mondial.db är förladdad.
--- Exempel:
--- SELECT * FROM City LIMIT 10;
--- SELECT Country.name, COUNT(*) 
--- FROM City JOIN Country ON City.country = Country.code 
--- GROUP BY Country.name;
 </div>
     </div>
 
@@ -376,23 +371,29 @@
     updateTabUi();
 
     // ----- Autocomplete -----
-    const baseWords = [
-      { value: "SELECT", meta: "keyword" },
-      { value: "FROM", meta: "keyword" },
-      { value: "WHERE", meta: "keyword" },
-      { value: "GROUP BY", meta: "keyword" },
-      { value: "ORDER BY", meta: "keyword" },
-      { value: "INNER JOIN", meta: "keyword" },
-      { value: "LEFT JOIN", meta: "keyword" },
-      { value: "RIGHT JOIN", meta: "keyword" },
-      { value: "ON", meta: "keyword" },
-      { value: "LIMIT", meta: "keyword" },
-      { value: "COUNT", meta: "func" },
-      { value: "AVG", meta: "func" },
-      { value: "MAX", meta: "func" },
-      { value: "MIN", meta: "func" },
-      { value: "SUM", meta: "func" }
-    ];
+const baseWords = [
+  { value: "SELECT", meta: "keyword" },
+  { value: "FROM", meta: "keyword" },
+  { value: "WHERE", meta: "keyword" },
+  { value: "BETWEEN", meta: "keyword" },
+  { value: "AND", meta: "keyword" },
+  { value: "OR", meta: "keyword" },
+  { value: "GROUP BY", meta: "keyword" },
+  { value: "ORDER BY", meta: "keyword" },
+  { value: "JOIN", meta: "keyword" },
+  { value: "INNER JOIN", meta: "keyword" },
+  { value: "LEFT JOIN", meta: "keyword" },
+  { value: "RIGHT JOIN", meta: "keyword" },
+  { value: "ON", meta: "keyword" },
+  { value: "LIMIT", meta: "keyword" },
+  { value: "COUNT", meta: "func" },
+  { value: "AVG", meta: "func" },
+  { value: "MAX", meta: "func" },
+  { value: "MIN", meta: "func" },
+  { value: "SUM", meta: "func" }
+];
+
+
 
     let schemaWords = [...baseWords];
 

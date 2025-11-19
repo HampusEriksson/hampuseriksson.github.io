@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="sv">
+
 <head>
   <meta charset="utf-8" />
   <title>SQL-editor med autocomplete & SQLite (mondial)</title>
@@ -13,7 +14,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -23,6 +27,7 @@
       flex-direction: column;
       height: 100vh;
     }
+
     header {
       padding: 0.5rem 0.9rem;
       border-bottom: 1px solid #1e293b;
@@ -32,16 +37,19 @@
       gap: 0.5rem;
       align-items: center;
     }
+
     header h1 {
       font-size: 1rem;
       margin: 0;
       margin-right: auto;
       font-weight: 600;
     }
+
     header .meta {
       font-size: 0.8rem;
       opacity: 0.8;
     }
+
     .toolbar {
       padding: 0.2rem 0.9rem 0.4rem 0.9rem;
       border-bottom: 1px solid #1e293b;
@@ -51,11 +59,13 @@
       align-items: center;
       background: #020617;
     }
+
     .tabs {
       display: flex;
       flex-wrap: wrap;
       gap: 0.25rem;
     }
+
     .tab-btn {
       padding: 0.2rem 0.6rem;
       font-size: 0.78rem;
@@ -65,10 +75,12 @@
       color: #e5e7eb;
       cursor: pointer;
     }
+
     .tab-btn.active {
       background: #0f172a;
       border-color: #38bdf8;
     }
+
     button {
       padding: 0.25rem 0.6rem;
       font-size: 0.8rem;
@@ -78,7 +90,11 @@
       color: #e5e7eb;
       cursor: pointer;
     }
-    button:hover { background: #1e293b; }
+
+    button:hover {
+      background: #1e293b;
+    }
+
     .toolbar-right {
       margin-left: auto;
       display: flex;
@@ -86,11 +102,13 @@
       align-items: center;
       flex-wrap: wrap;
     }
+
     .layout-buttons button {
       font-size: 0.72rem;
       padding: 0.18rem 0.5rem;
       opacity: 0.9;
     }
+
     .status {
       font-size: 0.8rem;
       color: #9ca3af;
@@ -115,15 +133,18 @@
       font-size: 0.8rem;
       overflow-y: auto;
     }
+
     #sidebar h2 {
       font-size: 0.85rem;
       margin: 0 0 0.3rem 0.3rem;
       font-weight: 600;
       color: #e5e7eb;
     }
+
     .table-item {
       margin-bottom: 0.2rem;
     }
+
     .table-header {
       display: flex;
       align-items: center;
@@ -132,18 +153,22 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
     .table-header:hover {
       background: #0f172a;
     }
+
     .table-arrow {
       font-size: 0.7rem;
       width: 1rem;
       text-align: center;
       opacity: 0.7;
     }
+
     .table-name {
       font-weight: 500;
     }
+
     .columns {
       margin-left: 1.1rem;
       margin-top: 0.1rem;
@@ -151,9 +176,11 @@
       border-left: 1px dashed #475569;
       display: none;
     }
+
     .columns.open {
       display: block;
     }
+
     .column-name {
       padding: 0.05rem 0.1rem;
       color: #cbd5f5;
@@ -168,10 +195,12 @@
       flex-direction: column;
       border-right: 1px solid #1e293b;
     }
+
     #editor {
       flex: 1;
       width: 100%;
     }
+
     .right {
       flex: 0 0 40%;
       min-width: 200px;
@@ -179,6 +208,7 @@
       flex-direction: column;
       max-height: 100%;
     }
+
     .right h2 {
       font-size: 0.85rem;
       margin: 0;
@@ -186,27 +216,33 @@
       border-bottom: 1px solid #1e293b;
       background: #020617;
     }
+
     #results {
       flex: 1;
       overflow: auto;
       padding: 0.4rem 0.7rem;
       font-size: 0.8rem;
     }
+
     table {
       border-collapse: collapse;
       width: 100%;
       font-size: 0.8rem;
     }
-    th, td {
+
+    th,
+    td {
       border: 1px solid #1f2937;
       padding: 0.2rem 0.3rem;
       text-align: left;
     }
+
     th {
       background: #111827;
       position: sticky;
       top: 0;
     }
+
     .hint {
       padding: 0.3rem 0.9rem;
       font-size: 0.75rem;
@@ -214,6 +250,7 @@
       background: #020617;
       color: #9ca3af;
     }
+
     .hint code {
       background: #0b1120;
       padding: 0.1rem 0.25rem;
@@ -224,20 +261,26 @@
       .main {
         flex-direction: column;
       }
+
       #sidebar {
-        display: none; /* göm sidomenyn på väldigt små skärmar om det krånglar */
+        display: none;
+        /* göm sidomenyn på väldigt små skärmar om det krånglar */
       }
-      #editorPane, .right {
+
+      #editorPane,
+      .right {
         flex: 0 0 auto;
         width: 100%;
         min-height: 40%;
       }
+
       .right {
         border-top: 1px solid #1e293b;
       }
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1>SQL-editor (mondial)</h1>
@@ -271,7 +314,7 @@
 
     <div id="editorPane">
       <div id="editor">-- Databasen mondial.db är förladdad.
-</div>
+      </div>
     </div>
 
     <div class="right">
@@ -324,7 +367,7 @@
     editor.commands.addCommand({
       name: "runQueryShiftEnter",
       bindKey: { win: "Shift-Enter", mac: "Shift-Enter" },
-      exec: function(editorInstance) {
+      exec: function (editorInstance) {
         runBtn.click();
       }
     });
@@ -371,34 +414,34 @@
     updateTabUi();
 
     // ----- Autocomplete -----
-const baseWords = [
-  { value: "SELECT", meta: "keyword" },
-  { value: "FROM", meta: "keyword" },
-  { value: "WHERE", meta: "keyword" },
-  { value: "BETWEEN", meta: "keyword" },
-  { value: "AND", meta: "keyword" },
-  { value: "OR", meta: "keyword" },
-  { value: "GROUP BY", meta: "keyword" },
-  { value: "ORDER BY", meta: "keyword" },
-  { value: "JOIN", meta: "keyword" },
-  { value: "INNER JOIN", meta: "keyword" },
-  { value: "LEFT JOIN", meta: "keyword" },
-  { value: "RIGHT JOIN", meta: "keyword" },
-  { value: "ON", meta: "keyword" },
-  { value: "LIMIT", meta: "keyword" },
-  { value: "COUNT", meta: "func" },
-  { value: "AVG", meta: "func" },
-  { value: "MAX", meta: "func" },
-  { value: "MIN", meta: "func" },
-  { value: "SUM", meta: "func" }
-];
+    const baseWords = [
+      { value: "SELECT", meta: "keyword" },
+      { value: "FROM", meta: "keyword" },
+      { value: "WHERE", meta: "keyword" },
+      { value: "BETWEEN", meta: "keyword" },
+      { value: "AND", meta: "keyword" },
+      { value: "OR", meta: "keyword" },
+      { value: "GROUP BY", meta: "keyword" },
+      { value: "ORDER BY", meta: "keyword" },
+      { value: "JOIN", meta: "keyword" },
+      { value: "INNER JOIN", meta: "keyword" },
+      { value: "LEFT JOIN", meta: "keyword" },
+      { value: "RIGHT JOIN", meta: "keyword" },
+      { value: "ON", meta: "keyword" },
+      { value: "LIMIT", meta: "keyword" },
+      { value: "COUNT", meta: "func" },
+      { value: "AVG", meta: "func" },
+      { value: "MAX", meta: "func" },
+      { value: "MIN", meta: "func" },
+      { value: "SUM", meta: "func" }
+    ];
 
 
 
     let schemaWords = [...baseWords];
 
     const customCompleter = {
-      getCompletions: function(editor, session, pos, prefix, callback) {
+      getCompletions: function (editor, session, pos, prefix, callback) {
         if (!prefix) return callback(null, []);
         const completions = schemaWords.map(w => ({
           caption: w.value,
@@ -469,7 +512,9 @@ const baseWords = [
           return;
         }
 
-        const tableNames = tablesRes[0].values.map(row => row[0]);
+        const tableNames = tablesRes[0].values
+          .map(row => row[0])
+          .sort((a, b) => String(a).localeCompare(String(b)));
 
         tableNames.forEach(tnameRaw => {
           const tname = String(tnameRaw);
@@ -533,7 +578,9 @@ const baseWords = [
       try {
         const tablesRes = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
         if (tablesRes.length) {
-          const tableNames = tablesRes[0].values.map(row => row[0]);
+const tableNames = tablesRes[0].values
+  .map(row => row[0])
+  .sort((a, b) => String(a).localeCompare(String(b)));
           tableNames.forEach(tnameRaw => {
             const tname = String(tnameRaw);
             words.push({ value: tname, meta: "table" });
@@ -620,4 +667,5 @@ const baseWords = [
     layoutResultBtn.addEventListener("click", () => setLayout(30));
   </script>
 </body>
+
 </html>
